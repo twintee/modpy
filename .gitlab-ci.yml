@@ -1,0 +1,38 @@
+image: python:3.7-slim
+
+stages:
+  - build
+  - test
+  - deploy
+
+before_script:
+    - pip install --upgrade pip
+
+build_job1:
+  stage: build
+  script:
+    - pip install --upgrade mkdocs
+    - mkdocs build
+  artifacts:
+    paths:
+      - site/
+
+test_job1:
+  stage: test
+  variables:
+    AWS_ACCESS_KEY_ID: "your-aws-access-key-id"
+    AWS_SECRET_ACCESS_KEY: "your-aws-secret-access-key"
+  script:
+    - pip install --upgrade awscli
+    - aws s3 sync --dryrun --delete ${CI_PROJECT_DIR}/site s3://your-bucket-name/
+
+deploy_job1:
+  stage: deploy
+  variables:
+    AWS_ACCESS_KEY_ID: "your-aws-access-key-id"
+    AWS_SECRET_ACCESS_KEY: "your-aws-secret-access-key"
+  script:
+    - pip install --upgrade awscli
+    - aws s3 sync --delete ${CI_PROJECT_DIR}/site s3://your-bucket-name/
+  only:
+    - master

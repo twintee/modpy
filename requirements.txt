@@ -1,0 +1,6 @@
+mattermostdriver
+requests
+python-gitlab
+python-dotenv
+
+coverage
