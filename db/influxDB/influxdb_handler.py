@@ -94,31 +94,19 @@ class InfluxDbHandler:
         if ref_db not in dbs:
             self.hndl.create_database(_db)
 
-    def write_points(self, _measurement, _fields, _tags):
+    def write_points(self, _data):
 
         """
         insert records
 
         Parameters
         -----
-        _fields : object
-            insert fields as key and value sets
-        _tags : object
-            record tags as key and value sets
-        _measurement : str
-            insert fields as key and value sets
+        _data : list(dict)
+            insert formatdata
         """
 
-        # インポートするjsonデータを作成
-        import_data = [
-            {
-            "fields" : _fields,
-            "tags" : _tags,
-            "measurement" : _measurement,
-            }
-        ]
         # データ投入
-        self.hndl.write_points(import_data)
+        self.hndl.write_points(_data)
 
     def get_points(self, _query):
         """
