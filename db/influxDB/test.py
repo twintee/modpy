@@ -10,20 +10,19 @@ Usage
 
 """
 import os
+from os.path import isfile, isdir, join, dirname, abspath, splitext
 import sys
-import json
 import argparse
-import time
 from dotenv import load_dotenv
 from influxdb.resultset import ResultSet as ifret
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.append(join(dirname(__file__), '../..'))
 import helper as fn
-from db.influxDB.ifmod import influxClient
+from db.influxDB.influxdb_handler import InfluxDbHandler as ifhndl
 
-dir_script = os.path.abspath(os.path.dirname(__file__))
+dir_script = abspath(dirname(__file__))
 os.chdir(dir_script)
-file_env = os.path.join(dir_script, ".env")
+file_env = join(dir_script, ".env")
 
 def get_env(_ref, _keys):
     """
@@ -32,7 +31,7 @@ def get_env(_ref, _keys):
     load_dotenv(_ref)
     env_data = {}
 
-    for i, key in enumerate(_keys):
+    for key in _keys:
         env_data[key] = os.getenv(key)
     return env_data
 
@@ -86,41 +85,39 @@ if __name__ == "__main__":
             "IF_PASSWORD",
             "IF_DATABASE",
             "IF_MEASUREMENT",
-        ]
-    if not os.path.isfile(file_env) or args.reset:
+            ]
+    if not isfile(file_env) or args.reset:
         params = fn.input_params(if_keys)
         write_env(params)
     if_host = get_env(file_env, if_keys)
 
-    if_hndl = influxClient(
-        if_host["IF_HOST"],
-        if_host["IF_USER"],
-        if_host["IF_PASSWORD"],
-        if_host["IF_DATABASE"],
-        int(if_host["IF_PORT"])
-        )
+    if_hndl = ifhndl(if_host["IF_HOST"],
+            if_host["IF_USER"],
+            if_host["IF_PASSWORD"],
+            if_host["IF_DATABASE"],
+            int(if_host["IF_PORT"]))
     meas = if_host["IF_MEASUREMENT"]
 
     field_keys = [
-        "estimate",
-        "data2",
-        "data3",
-    ]
+            "estimate",
+            "data2",
+            "data3",
+            ]
     tag_keys = [
-        "sprint",
-        "week",
-    ]
+            "sprint",
+            "week",
+            ]
 
     if args.cmd == "insert":
         fields = {
-            "estimate": 100,
-            "data2": 200,
-            "data3": 300,
-            }
+                "estimate": 100,
+                "data2": 200,
+                "data3": 300,
+                }
         tags = {
-            "sprint": "sprint30",
-            "week": 10,
-            }
+                "sprint": "sprint30",
+                "week": 10,
+                }
         insert_data(fields, tags)
     if args.cmd == "get":
         ret = get_data()
@@ -133,10 +130,10 @@ if __name__ == "__main__":
             for rec in recs:
                 print(rec)
                 fields = {
-                    "estimate": 500,
-                    }
+                        "estimate": 500,
+                        }
                 tags = {
-                    "week": 20,
-                    }
+                        "week": 20,
+                        }
                 update_data(rec["time"], fields, tags)
     print("----------initialize end.")

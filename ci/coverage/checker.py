@@ -1,15 +1,16 @@
 import os
+from os.path import isfile, isdir, join, dirname, abspath, splitext
 import sys
 import json
 import argparse
 
-dir_script = os.path.abspath(os.path.dirname(__file__))
+dir_script = abspath(dirname(__file__))
 
 def check_cov(_path, _threshold):
     """
     read coverage json
     """
-    if not os.path.isfile(_path):
+    if not isfile(_path):
         print(f"[error] not exist cov file: {_path}")
         sys.exit(1)
     with open(_path, 'r', encoding="utf-8") as f:

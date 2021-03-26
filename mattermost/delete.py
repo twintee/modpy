@@ -1,12 +1,13 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+from os.path import isfile,isdir,join,dirname,abspath,splitext
 import sys
 import argparse
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(join(dirname(__file__), '..'))
 import helper as fn
-from mattermost.mm import MatterMost
+from mattermost.mm import MatterMostHandler as mmhndl
 
 def main(_args):
     """
@@ -14,7 +15,7 @@ def main(_args):
         :param params: args
     """
 
-    mm_hndl = MatterMost()
+    mm_hndl = mmhndl()
     ret = mm_hndl.delete_message(_args.id)
     if ret:
         print(f"[info] post deleted.")

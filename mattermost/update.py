@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+from os.path import isfile, isdir, join, dirname, abspath, splitext
 import sys
 import argparse
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-import helper as fn
-from mattermost.mm import MatterMost
+sys.path.append(join(dirname(__file__), '..'))
+from mattermost.mm import MatterMostHandler as mmhndl
 
 def main(_args):
     """
@@ -14,7 +14,7 @@ def main(_args):
         :param params: args
     """
 
-    mm_hndl = MatterMost(login_id=_args.user, password=_args.passwd)
+    mm_hndl = mmhndl(_login_id=_args.user, _password=_args.passwd)
     ret = mm_hndl.update_message(_args.id, _args.msg)
     if ret:
         print(f"[info] post updated.")

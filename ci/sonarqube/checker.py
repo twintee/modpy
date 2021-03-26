@@ -1,14 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-import sys
-import json
+from os.path import isfile, isdir, join, dirname, abspath, splitext
 import requests
 import argparse
 
-from requests.sessions import merge_setting
-
-dir_script = os.path.abspath(os.path.dirname(__file__))
+dir_script = abspath(dirname(__file__))
 
 def check_sonar_issue(_host, _user, _pass, _project_key, _severities=None, _statuses=None):
     """

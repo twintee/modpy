@@ -58,7 +58,7 @@ def req_build(job_name):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='check meeting root use ratio.')
+    parser = argparse.ArgumentParser(description='call jenkins api.')
 
     parser.add_argument('job_name', help='require build job name.')
 

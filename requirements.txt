@@ -1,4 +1,6 @@
 mattermostdriver
+influxdb
+
 requests
 python-gitlab
 python-dotenv

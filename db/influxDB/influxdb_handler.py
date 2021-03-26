@@ -1,9 +1,14 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+from os.path import isfile, isdir, join, dirname, abspath, splitext
+import sys
 from influxdb import InfluxDBClient
 
-class influxClient:
+sys.path.append(abspath(join(dirname(__file__), '..', '..')))
+from loader.env_loader import EnvLoader
+
+class InfluxDbHandler:
     """influxDB Api handler class
 
     Attributes:
@@ -12,7 +17,13 @@ class influxClient:
             api handler
     """
 
-    def __init__(self, _host, _user, _passwd, _db, _port=8086):
+    def __init__(self,
+            _host:str=None,
+            _user:str=None,
+            _passwd:str=None,
+            _db:str=None,
+            _port=8086,
+            _envfile:str=".env"):
         """
         constructor
 
@@ -29,7 +40,41 @@ class influxClient:
         _port : int
             port number
         """
-        self.hndl = InfluxDBClient(_host, _port, _user, _passwd, _db)
+        self.ifinfo = {
+            'port': _port,
+        }
+
+        dir_script = abspath(dirname(__file__))
+        path_env = join(dir_script, _envfile)
+
+        # envがあれば初期値読み込み
+        self.env = EnvLoader(path_env)
+        if isfile(path_env):
+            print(f"[info] get ifinfo from: {path_env}")
+            self.ifinfo["host"] = self.env.get("host")
+            self.ifinfo["port"] = self.env.get("port")
+            self.ifinfo["user"] = self.env.get("user")
+            self.ifinfo["password"] = self.env.get("password")
+            self.ifinfo["db"] = self.env.get("db")
+
+        # 引数上書き
+        if not _host is None:
+            self.ifinfo["url"] = _host
+        if not _port is None:
+            self.ifinfo["port"] = _port
+        if not _user is None:
+            self.ifinfo["user"] = _user
+        if not _passwd is None:
+            self.ifinfo["password"] = _passwd
+        if not _db is None:
+            self.ifinfo['db'] = _db
+
+        self.hndl = InfluxDBClient(self.ifinfo['host'],
+                self.ifinfo['port'],
+                self.ifinfo['user'],
+                self.ifinfo['password'],
+                self.ifinfo['db'])
+        self.env.save(_params=self.ifinfo)
 
         self.create_db(_db)
 

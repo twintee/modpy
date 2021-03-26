@@ -1,15 +1,14 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-from os.path import join, dirname, isfile, isdir, abspath
+from os.path import isfile, isdir, join, dirname, abspath, splitext
 import sys
-import mattermostdriver as mmdriver
-from mattermostdriver import Driver
+from mattermostdriver import Driver as mmDriver, exceptions as mmex
 
 sys.path.append(join(dirname(__file__), '..'))
-import helper as fn
+from loader.env_loader import EnvLoader
 
-class MatterMost:
+class MatterMostHandler:
     """
     MatterMost
 
@@ -29,69 +28,94 @@ class MatterMost:
             users
     """
 
-    def __init__(self
-                 , login_id="", password="", token=""
-                 , host="", team="", port=80, verify=False):
+    def __init__(self,
+            _url:str=None,
+            _scheme:str='http',
+            _port:int=None,
+            _login_id:str=None,
+            _password:str=None,
+            _token:str=None,
+            _team:str=None,
+            _verify:bool=False,
+            _envfile:str=".env"):
         """
         constructor
 
         Parameters
         -----
+        url: str
+            (optional)host name
+        scheme: str
+            (optional)host name
+        port: str
+            (optional)host port num
         login_id: str
             login id(mail address)
         password: str
             login password(use with login id)
         team: str
             (optional)url suffix
-        host: str
-            (optional)host name
-        port: str
-            (optional)host port num
         verify: str
             (optional)host verify
         """
 
-        mm_info = {
-            'url': "xx.xx.xx.xx",
-            'scheme': 'http',
-            'login_id': login_id,
-            'password': password,
-            'port': port,
-            'timeout': 5,
-            'verify': verify,
+        self.mminfo = {
+            'scheme': _scheme,
+            'port': _port,
         }
 
         dir_script = abspath(dirname(__file__))
-        path_env = join(dir_script, ".env")
+        path_env = join(dir_script, _envfile)
 
-        self.team = "xxxxxxxx"
-
+        # envがあれば初期値読み込み
+        self.env = EnvLoader(path_env)
         if isfile(path_env):
-            # envがあれば設定上書き
             print(f"[info] get mminfo from: {path_env}")
-            param_env = fn.get_env(path_env)
-            login_id = param_env["MM_USER"]
-            password = param_env["MM_PASSWORD"]
-            host = param_env["MM_HOST"]
-            team = param_env["MM_TEAM"]
-            port = int(param_env["MM_PORT"])
+            self.mminfo["url"] = self.env.get("url")
+            self.mminfo["port"] = self.env.get("port")
+            self.mminfo["login_id"] = self.env.get("login_id")
+            self.mminfo["password"] = self.env.get("password")
+            # self.mminfo["token"] = self.env.get("token")
+            self.mminfo["team"] = self.env.get("team")
 
-        if token != "":
-            mm_info["token"] = token
-        else:
-            mm_info["login_id"] = login_id
-            mm_info["password"] = password
-        if host != "":
-            mm_info["url"] = host
-        mm_info["port"] = port
-        if team != "":
-            self.team = team
+        # 引数上書き
+        if not _url is None:
+            self.mminfo["url"] = _url
+        if not _port is None:
+            self.mminfo["port"] = _port
+        if not _login_id is None:
+            self.mminfo["login_id"] = _login_id
+        if not _password is None:
+            self.mminfo["password"] = _password
+        # if not _token is None:
+        #     self.mminfo["token"] = _token
+        #     if "login_id" in self.mminfo:
+        #         del self.mminfo["login_id"], self.mminfo["password"]
+        #     if "password" in self.mminfo:
+        #         del self.mminfo["password"]
+        # else:
+        #     self.mminfo["login_id"] = _login_id
+        #     self.mminfo["password"] = _password
+        #     if "token" in self.mminfo:
+        #         del self.mminfo["token"]
+        if not _team is None:
+            self.mminfo['team'] = _team
 
-        self.mat = Driver(mm_info)
-        self.mat.login()
+        self.hndl = mmDriver({
+                'url': self.mminfo['url'],
+                'scheme': self.mminfo['scheme'],
+                'login_id': self.mminfo['login_id'],
+                'password': self.mminfo['password'],
+                'port': int(self.mminfo['port']),
+                'timeout': 5,
+                'verify': _verify,
+                })
+        self.hndl.login()
+
+        self.env.save(_params=self.mminfo)
         self.users = None
     def logout(self):
-        self.mat.logout()
+        self.hndl.logout()
 
     def get_channel_id(self, ch_name):
         """
@@ -102,7 +126,7 @@ class MatterMost:
         ch_name : str
             target channel name
         """
-        channel_id = self.mat.api['channels'].get_channel_by_name_and_team_name(self.team, ch_name)['id']
+        channel_id = self.hndl.api['channels'].get_channel_by_name_and_team_name(self.mminfo['team'], ch_name)['id']
         return channel_id
 
     def get_users(self, opt):
@@ -114,7 +138,7 @@ class MatterMost:
         opt : dict
             filters
         """
-        res = self.mat.api['users'].get_users(opt)
+        res = self.hndl.api['users'].get_users(opt)
         # print(json.dumps(res, indent=2, ensure_ascii=False))
         return res
 
@@ -150,7 +174,7 @@ class MatterMost:
             sort key field
         """
         try:
-            res = self.mat.api['posts'].get_posts_for_channel(
+            res = self.hndl.api['posts'].get_posts_for_channel(
                 self.get_channel_id(ch_name)
                 , opt
             )
@@ -161,7 +185,7 @@ class MatterMost:
                 return ret
             else:
                 return sorted(ret, key=lambda x:x[sort_key])
-        except mmdriver.exceptions.ResourceNotFound as ex:
+        except mmex.ResourceNotFound as ex:
             return None
 
     def create_message(self, ch_name, msg):
@@ -175,7 +199,7 @@ class MatterMost:
         msg : str
             post message
         """
-        res = self.mat.api['posts'].create_post(options={
+        res = self.hndl.api['posts'].create_post(options={
             'channel_id': self.get_channel_id(ch_name),
             'message': msg,
         })
@@ -197,11 +221,11 @@ class MatterMost:
             update message
         """
         try:
-            self.mat.api['posts'].update_post(post_id=post_id, options={
+            self.hndl.api['posts'].update_post(post_id=post_id, options={
                 'id': post_id,
                 'message': msg,
             })
-        except mmdriver.exceptions.ResourceNotFound as ex:
+        except mmex.ResourceNotFound as ex:
             return False
         return True
 
@@ -217,7 +241,7 @@ class MatterMost:
             update message
         """
         try:
-            self.mat.api['posts'].delete_post(post_id=post_id)
-        except mmdriver.exceptions.ResourceNotFound as ex:
+            self.hndl.api['posts'].delete_post(post_id=post_id)
+        except mmex.ResourceNotFound as ex:
             return False
         return True

@@ -1,9 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+from os.path import isfile
 import sys
-import json
-import time
 from datetime import datetime as dt
 import string
 import random
@@ -19,88 +18,6 @@ def input_params(_keys):
         _input = input(f"input {key} value. :")
         ret[key] = _input
     return ret
-
-def get_env(_path):
-    """
-    update env param
-    """
-    if not os.path.isfile(_path):
-        print(f"[info] not exist env file. {_path}")
-        return {}
-
-    # ファイル行読みしながらテキスト置き換え
-    with open(_path, 'r', encoding="utf8") as f:
-        ret = {}
-        while True:
-            line = f.readline()
-            if line:
-                spl = line.replace('\n', '').split("=", 2)
-                ret[spl[0]] = spl[1]
-            else:
-                break
-        return ret
-
-def set_env(_path, _params, _reset=False):
-    """
-    update env param
-    """
-
-    if not _reset:
-        m_params = get_env(_path)
-        _params.update(m_params)
-    new_lines = ""
-    for k, v in _params.items():
-        new_lines += f"{k}={v}\n"
-    # ファイル名保存
-    with open(_path, mode="w", encoding="utf8") as f:
-        f.write(new_lines)
-
-def elapse_timer(_ref_frame, _pre="", _suf=""):
-    """
-    処理時間計測用。基準時間からcallされた時間までの差分時間を表示。
-
-    Parameters
-    ----------
-    - ref_frame : float
-        差分の基準時間
-    - pref : str
-        表示テキストのプレフィックス
-    - suff : str
-        表示テキストのサフィックス
-
-    Returns
-    -------
-    - get_frame : float
-        差分計測用に取得した時間
-    """
-    get_frame = time.time()
-    elapsed_frame = get_frame - _ref_frame
-    print(f"{_pre}{elapsed_frame}{_suf}")
-    return get_frame
-
-def check_path(_cls: str, _ref: str, _abort=False):
-    """
-    パスの存在確認
-
-    Parameters
-    -----
-    _cls : str
-        参照元。
-    _ref : str
-        確認するパス
-    _abort : bool
-        存在しない場合処理中断するか。
-
-    Returns
-    -----
-    - result:bool
-    """
-    if not os.path.exists(_ref):
-        print(f'[error] {_cls}: not exist file. [{_ref}]')
-        if _abort:
-            sys.exit()
-        return False
-    return True
 
 def get_local_ip():
     """
@@ -126,60 +43,6 @@ def random_str(_n: int):
         generate text length
     """
     return ''.join(random.choices(string.ascii_letters + string.digits, k=_n))
-
-def load_json(_ref: str):
-    """
-    read json file
-
-    Parameters
-    ----------
-    _ref : str
-        open json file path
-    """
-
-    check_path(sys._getframe().f_code.co_name, _ref)
-    with open(_ref, 'r', encoding="utf-8") as f:
-        return json.load(f)
-
-def save_json(_dist: str, _settings):
-    """
-    save json file
-
-    Parameters
-    ----------
-    _dist : str
-        save json file path
-    _settings : dict
-        save target dict
-    """
-    with open(_dist, "w", encoding="utf-8") as dist:
-        json.dump(_settings, dist, indent=4, ensure_ascii=False)
-
-def load_setting(_ref: str, _dist: str, _settings, _sep="@"):
-    """
-    replace text enclosed '@' by _settings include key and values
-
-    Parameters
-    ----------
-    _ref : str
-        original file
-    _dist : str
-        output path
-    _settings : dict
-        reference replace setting json
-    _sep : str
-        sand str for replace word(default "@")
-    """
-
-    check_path(sys._getframe().f_code.co_name, _ref)
-
-    with open(_ref, 'r', encoding="utf-8") as ref:
-        data_ref = ref.read()
-    for k, val in _settings.items():
-        data_ref = data_ref.replace(f"{_sep}{k}{_sep}", f"{val}")
-
-    with open(_dist, "w", encoding="utf-8") as dist:
-        dist.write(data_ref)
 
 def cmd_lines(_cmd, _cwd="", _encode='cp932', _wait_enter=False):
     """
@@ -238,8 +101,7 @@ def cmd_lines(_cmd, _cwd="", _encode='cp932', _wait_enter=False):
             if not line and proc.poll() is not None:
                 break
 
-
-def find_text(_ref, _find):
+def find_text(_ref, _find, _first=True):
     """
     check word in text file
 
@@ -250,15 +112,22 @@ def find_text(_ref, _find):
     _find: str
         search word
     """
-    check_path(sys._getframe().f_code.co_name, _ref)
+    ret = None
+    if not isfile(_ref):
+        print(f"[error] no file: {_ref}")
+        return None
     with open(_ref) as flines:
-        for row, text in enumerate(flines, start=1):
+        for i, text in enumerate(flines, start=1):
             text = text.rstrip()
             if _find in text:
-                return True
-    return False
+                if _first:
+                    return text
+                if ret is None:
+                    ret = []
+                ret.append(text)
+    return ret
 
-def ymd_to_timestamp(ymd, is_ms=False):
+def timestr_to_timestamp(_ref_time=None, _is_ms=False):
     """
     yyyymmddhhiiss convert to timestamp
 
@@ -269,8 +138,10 @@ def ymd_to_timestamp(ymd, is_ms=False):
     _is_ms : str
         comvert to ms style
     """
-    ret = dt.strptime(ymd, '%Y/%m/%d %H:%M:%S').timestamp()
-    if is_ms:
+    if _ref_time is None:
+        _ref_time = dt.now().strftime('%Y%m%d%H%M%S')
+    ret = dt.strptime(_ref_time, '%Y/%m/%d %H:%M:%S').timestamp()
+    if _is_ms:
         ret = f"{int(ret)}000"
     return int(ret)
 
