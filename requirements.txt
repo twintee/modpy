@@ -3,6 +3,5 @@ influxdb
 
 requests
 python-gitlab
-python-dotenv
 
 coverage

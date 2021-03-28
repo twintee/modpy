@@ -4,14 +4,14 @@ class EnvLoader():
 
     def __init__(self, _ref) -> None:
         self.path_ref = _ref
-        self.params = None
+        self.params = {}
         if not _ref is None:
             self.params = self.read(_ref)
         pass
 
     def read(self, _path):
         """
-        update env param
+        read envfile
         """
         if not isfile(_path):
             print(f"[info] not exist env file. {_path}")
@@ -28,6 +28,16 @@ class EnvLoader():
                 else:
                     break
             return ret
+
+    def input_params(self, _keys:list):
+        """
+        update env param
+        """
+        ret = {}
+        for key in enumerate(_keys):
+            _input = input(f"input {key} value. :")
+            self.params[key] = _input
+        return ret
 
     def get(self, _key):
         """

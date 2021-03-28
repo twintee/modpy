@@ -9,16 +9,6 @@ import random
 import subprocess
 import socket
 
-def input_params(_keys):
-    """
-    update env param
-    """
-    ret = {}
-    for i,key in enumerate(_keys):
-        _input = input(f"input {key} value. :")
-        ret[key] = _input
-    return ret
-
 def get_local_ip():
     """
     socketを使ってローカルIPを取得
@@ -127,21 +117,26 @@ def find_text(_ref, _find, _first=True):
                 ret.append(text)
     return ret
 
-def timestr_to_timestamp(_ref_time=None, _is_ms=False):
+def get_timestamp(_ref_time=None):
     """
     yyyymmddhhiiss convert to timestamp
 
     Parameters
     -----
     _ymd : str
-        target date str
-    _is_ms : str
-        comvert to ms style
+        formatted string YYYY/mm/dd HH:MM:SS.ffffff
+        no arg to get now timestamp
     """
     if _ref_time is None:
-        _ref_time = dt.now().strftime('%Y%m%d%H%M%S')
-    ret = dt.strptime(_ref_time, '%Y/%m/%d %H:%M:%S').timestamp()
-    if _is_ms:
-        ret = f"{int(ret)}000"
-    return int(ret)
+        return dt.now().timestamp()
+    try:
+        if len(_ref_time) > 19:
+            return dt.strptime(_ref_time, '%Y/%m/%d %H:%M:%S.%f').timestamp()
+        elif len(_ref_time) == 19:
+            return dt.strptime(_ref_time, '%Y/%m/%d %H:%M:%S.%f').timestamp()
+        else:
+            return None
+    except ValueError as e:
+        print(e)
+    return None
 
