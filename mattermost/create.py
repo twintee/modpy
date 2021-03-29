@@ -7,7 +7,7 @@ import argparse
 
 sys.path.append(join(dirname(__file__), '..'))
 
-from mattermost.mm import MatterMostHandler as mmhndl
+from mattermost.mattermost_handler import MatterMostHandler as mmhndl
 
 def main(_args):
     """

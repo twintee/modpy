@@ -20,7 +20,7 @@ python mattermost/init_env.py http 11.22.33.44 80 developer aaa@develop.com pass
 sys.path.append(join(dirname(__file__), '..'))
 
 import helper as fn
-from mattermost.mm import MatterMostHandler
+from mattermost.mattermost_handler import MatterMostHandler
 
 dir_script = abspath(dirname(__file__))
 
