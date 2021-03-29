@@ -1,7 +1,4 @@
-mattermostdriver
-influxdb
-
 requests
-python-gitlab
-
-coverage
+tqdm
+glob
+numpy
