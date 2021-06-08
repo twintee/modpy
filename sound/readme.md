@@ -16,23 +16,28 @@ pip install -r requirements.txt
 
 ### 音声録音
 
+* 使用法
+
 ```
 sr = SoundRecoder()
 sr.rec()
 wav_path = sr.get_wav()
 ```
 
-#### デモ実行
+* デモ実行
 
-* スクリプト実行
+  * スクリプト実行
 `python soundrecorder_demo.py`
 下記表示されたら音声録音中
 `Recording...`
-* `Ctrl + c`で録音終了。`sample.wav`が作成されて波形画像が表示される。
+  * `Ctrl + c`で録音終了。`sample.wav`が作成されて波形画像が表示される。
 
 ### ノイズ除去
 
+* 使用法
+
 ```
+from sound.noisecanceller import NoiseCanceller
 nc = NoiseCanceller()
 nc.load("nc.wav")
 nc.spectral_canceller(env_thresh=0.1, noise_level=1.0, volume_fix=True)
@@ -40,15 +45,16 @@ nc.spectral_canceller(env_thresh=0.1, noise_level=1.0, volume_fix=True)
 wav_nc_path = nc.write("nc_.wav")
 ```
 
-#### デモ実行
+* デモ実行
 
-* スクリプト実行
+  * スクリプト実行
 `python noisecanceller_demo.py`
-* オリジナル波形(青)、エンベロープ(オレンジ)、閾値（）の画像表示
-* オリジナル波形(青)、ノイズ除去波形(オレンジ)の画像表示
-* オリジナル音源再生
-* enterキーでノイズ除去音源再生
+  * オリジナル波形(青)、エンベロープ(オレンジ)、閾値（）の画像表示
+  * オリジナル波形(青)、ノイズ除去波形(オレンジ)の画像表示
+  * オリジナル音源再生
+  * enterキーでノイズ除去音源再生
 ```
+from sound.noisecanceller import NoiseCanceller
 nc = NoiseCanceller()
 nc.load("nc.wav")
 nc.spectral_canceller(env_thresh=None, noise_level=1.0)
