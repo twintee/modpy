@@ -2,7 +2,7 @@
 
 python3のサウンド関連モジュール
 
-## Installation
+## 🌎 Installation
 
 ```
 pip install -r requirements.txt
@@ -12,7 +12,7 @@ pip install -r requirements.txt
 * windowsのpython3.7系以降の場合、pyaudioのpipインストールは非公式版ダウンロードのみ。  
 [参考url](https://qiita.com/sugi-juku/items/c92f8f170a6b455e15f2)
 
-## usage
+## 📚 usage
 
 ### 音声録音
 
