@@ -19,6 +19,7 @@ pip install -r requirements.txt
 * 使用法
 
 ```
+from sound.soundrecorder import SoundRecoder
 sr = SoundRecoder()
 sr.rec()
 wav_path = sr.get_wav()
@@ -53,9 +54,3 @@ wav_nc_path = nc.write("nc_.wav")
   * オリジナル波形(青)、ノイズ除去波形(オレンジ)の画像表示
   * オリジナル音源再生
   * enterキーでノイズ除去音源再生
-```
-from sound.noisecanceller import NoiseCanceller
-nc = NoiseCanceller()
-nc.load("nc.wav")
-nc.spectral_canceller(env_thresh=None, noise_level=1.0)
-```
