@@ -9,30 +9,31 @@ import random
 import subprocess
 import socket
 
-def input_y(_txt, _abort=False):
+def input_yn(_txt, _yes=False):
+    if _yes:
+        print(f"{_txt}y")
+        return True
     _input = input(_txt).lower()
     if _input in ["y", "yes"]:
         return True
-    else:
-        if _abort:
-            print("[info] initialize canceled.")
-            sys.exit()
     return False
 
-def input_list(_message, _list):
-    req_num = -1
-    def print_list():
-        print(f"\n-------------------------------\n{_message}")
-        for i, filter in enumerate(_list):
-            print(f"[{i + 1}] {basename(filter)}")
-    while req_num < 0 or req_num >= len(_list):
-        print_list()
-        _input = input("\ninput number. :")
-        if _input != "":
-            req_num = int(_input) - 1
-        if req_num < 0 or req_num >= len(_list):
-            print("\n[error] input number error.")
-    return req_num
+def info(message, time=True):
+    print_message(message, time=time)
+
+def error(message, time=True):
+    print_message(message, error=True, time=time)
+
+def print_message(message, error=False, time=True):
+    """
+    メッセージ表示
+    """
+    text = "[info]"
+    if error:
+        text = "[error]"
+    if time:
+        text += f" {dt.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    print(f"{text}")
 
 def get_local_ip():
     """
