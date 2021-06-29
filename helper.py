@@ -1,13 +1,38 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-from os.path import isfile
+from os.path import isfile, basename
 import sys
 from datetime import datetime as dt
 import string
 import random
 import subprocess
 import socket
+
+def input_y(_txt, _abort=False):
+    _input = input(_txt).lower()
+    if _input in ["y", "yes"]:
+        return True
+    else:
+        if _abort:
+            print("[info] initialize canceled.")
+            sys.exit()
+    return False
+
+def input_list(_message, _list):
+    req_num = -1
+    def print_list():
+        print(f"\n-------------------------------\n{_message}")
+        for i, filter in enumerate(_list):
+            print(f"[{i + 1}] {basename(filter)}")
+    while req_num < 0 or req_num >= len(_list):
+        print_list()
+        _input = input("\ninput number. :")
+        if _input != "":
+            req_num = int(_input) - 1
+        if req_num < 0 or req_num >= len(_list):
+            print("\n[error] input number error.")
+    return req_num
 
 def get_local_ip():
     """
@@ -34,7 +59,7 @@ def random_str(_n: int):
     """
     return ''.join(random.choices(string.ascii_letters + string.digits, k=_n))
 
-def cmd_lines(_cmd, _cwd="", _encode='cp932', _wait_enter=False):
+def cmdlines(_cmd, _cwd="", _encode='cp932', _wait_enter=False, _no_split=False):
     """
     execute command and stream text
 
@@ -53,17 +78,19 @@ def cmd_lines(_cmd, _cwd="", _encode='cp932', _wait_enter=False):
             if _wait_enter:
                 input("enter to execute cmd. ([ctrl + c] to cancel script)")
             cmd = ref.split()
+            if _no_split:
+                cmd = ref
             if _cwd == "":
                 proc = subprocess.Popen(cmd
                                         , stdout=subprocess.PIPE
                                         , stderr=subprocess.STDOUT
-                                        , shell=True)
+                                        , shell=_no_split)
             else:
                 proc = subprocess.Popen(cmd
                                         , cwd=_cwd
                                         , stdout=subprocess.PIPE
                                         , stderr=subprocess.STDOUT
-                                        , shell=True)
+                                        , shell=_no_split)
             while True:
                 line = proc.stdout.readline()
                 if line:
@@ -75,15 +102,19 @@ def cmd_lines(_cmd, _cwd="", _encode='cp932', _wait_enter=False):
         if _wait_enter:
             input("enter to execute cmd. ([ctrl + c] to cancel script)")
         cmd = _cmd.split()
+        if _no_split:
+            cmd = _cmd
         if _cwd == "":
             proc = subprocess.Popen(cmd
                                     , stdout=subprocess.PIPE
-                                    , stderr=subprocess.STDOUT)
+                                    , stderr=subprocess.STDOUT
+                                    , shell=_no_split)
         else:
             proc = subprocess.Popen(cmd
                                     , cwd=_cwd
                                     , stdout=subprocess.PIPE
-                                    , stderr=subprocess.STDOUT)
+                                    , stderr=subprocess.STDOUT
+                                    , shell=_no_split)
         while True:
             line = proc.stdout.readline()
             if line:
