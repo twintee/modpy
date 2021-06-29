@@ -18,6 +18,21 @@ def input_yn(_txt, _yes=False):
         return True
     return False
 
+def input_list(_message, _list):
+    req_num = -1
+    def print_list():
+        print(f"\n-------------------------------\n{_message}")
+        for i, filter in enumerate(_list):
+            print(f"[{i + 1}] {basename(filter)}")
+    while req_num < 0 or req_num >= len(_list):
+        print_list()
+        _input = input("\ninput number. :")
+        if _input != "":
+            req_num = int(_input) - 1
+        if req_num < 0 or req_num >= len(_list):
+            print("\n[error] input number error.")
+    return req_num
+
 def info(message, time=True):
     print_message(message, time=time)
 
