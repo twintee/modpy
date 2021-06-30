@@ -1,7 +1,7 @@
 from os.path import isfile
-import json
+import yaml
 
-class JsonLoader():
+class YamlLoader():
 
     def __init__(self, _ref:str=None) -> None:
 
@@ -21,11 +21,11 @@ class JsonLoader():
             open json file path
         """
         if not isfile(_ref):
-            print(f"[error] json file not exist. :{_ref}")
+            print(f"[error] file not exist. :{_ref}")
             return None
 
         with open(_ref, 'r', encoding=_enc) as f:
-            self.params = json.load(f)
+            self.params = yaml.load(f)
 
     def save(self, _dst:str=None):
         """
@@ -34,13 +34,13 @@ class JsonLoader():
         Parameters
         ----------
         _dst : str
-            save json file path
+            save file path
         """
         dst = str(self.path_ref)
         if not _dst is None:
             dst = _dst
 
         with open(dst, mode="w", encoding="utf-8", newline="\n") as f:
-            json.dump(self.params, f, indent=4, ensure_ascii=False)
+            f.write(yaml.dump(self.params, default_flow_style=False))
 
         return True

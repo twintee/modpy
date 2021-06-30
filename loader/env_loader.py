@@ -15,7 +15,7 @@ class EnvLoader():
         """
         if not isfile(_path):
             print(f"[info] not exist env file. {_path}")
-            return None
+            return {}
 
         # ファイル行読みしながらテキスト置き換え
         with open(_path, 'r', encoding="utf8") as f:

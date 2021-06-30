@@ -51,13 +51,7 @@ class CsvLoader():
                 self.params.append(row)
         return True
 
-    def get(self):
-        """
-        get params
-        """
-        return self.params
-
-    def set(self, _row):
+    def addrow(self, _row):
         """
         set row
 
@@ -65,6 +59,10 @@ class CsvLoader():
         ----------
         _row : list
         """
+        if len(self.params) > 0:
+            if len(self.params[0]) != len(_row):
+                print(f"[error] added row columns count error. : original[{len(self.params[0])}] - added[{len(_row)}]")
+                return False
         self.params.append(_row)
         return True
 
